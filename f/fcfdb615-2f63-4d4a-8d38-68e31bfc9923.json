@@ -1,0 +1,460 @@
+{
+  "contract_id": "bash-lint-policy-v1",
+  "title": "Bash Lint / Policy Contract",
+  "last_updated": "09/01/2026",
+  "baseline": {
+    "shell": "bash",
+    "min_version": "5.0"
+  },
+  "definitions": {
+    "entrypoint_paths": [
+      "bin/*"
+    ],
+    "root_sourced_sh_paths": [
+      "*.sh"
+    ],
+    "library_paths": [
+      "lib/**/*.sh",
+      "apps/**/*.sh",
+      "modules/**/*.sh"
+    ],
+    "bootstrap_paths": [
+      "bootstrap/**/*.sh"
+    ],
+    "all_bash_paths": [
+      "bin/*",
+      "*.sh",
+      "lib/**/*.sh",
+      "apps/**/*.sh",
+      "modules/**/*.sh",
+      "bootstrap/**/*.sh"
+    ]
+  },
+  "rules": [
+    {
+      "id": "BASH-PATH-001",
+      "severity": "must",
+      "category": "structure",
+      "title": "bin/ contains executable entrypoints",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "path_classification",
+          "classification": "entrypoint"
+        }
+      ]
+    },
+    {
+      "id": "BASH-PATH-002",
+      "severity": "must",
+      "category": "structure",
+      "title": "lib/, apps/, modules/ contain sourced libraries",
+      "scope": {
+        "paths": [
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "path_classification",
+          "classification": "library"
+        }
+      ]
+    },
+    {
+      "id": "BASH-PATH-003",
+      "severity": "must",
+      "category": "structure",
+      "title": "bootstrap/ is sourced-only unless located in bin/",
+      "scope": {
+        "paths": [
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "path_classification",
+          "classification": "bootstrap"
+        }
+      ],
+      "notes": [
+        "Bootstrap content minimality is not linted here; only execution/sourcing semantics."
+      ]
+    },
+    {
+      "id": "BASH-PATH-004",
+      "severity": "must",
+      "category": "structure",
+      "title": "Top-level *.sh files are source-only by default",
+      "scope": {
+        "paths": [
+          "*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "path_classification",
+          "classification": "root_sourced"
+        }
+      ],
+      "notes": [
+        "Top-level executable scripts must live in bin/.",
+        "This rule exists to cover repository-level loader scripts."
+      ]
+    },
+    {
+      "id": "BASH-MODE-001",
+      "severity": "must",
+      "category": "mode",
+      "title": "Entrypoints must be executable",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "git_mode_required",
+          "allowed_modes": [
+            "100755"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BASH-MODE-002",
+      "severity": "must",
+      "category": "mode",
+      "title": "Libraries must not be executable",
+      "scope": {
+        "paths": [
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "git_mode_forbidden",
+          "forbidden_modes": [
+            "100755"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BASH-MODE-003",
+      "severity": "must",
+      "category": "mode",
+      "title": "Bootstrap files must not be executable",
+      "scope": {
+        "paths": [
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "git_mode_forbidden",
+          "forbidden_modes": [
+            "100755"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BASH-MODE-005",
+      "severity": "must",
+      "category": "mode",
+      "title": "Top-level *.sh files must not be executable",
+      "scope": {
+        "paths": [
+          "*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "git_mode_forbidden",
+          "forbidden_modes": [
+            "100755"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BASH-MODE-004",
+      "severity": "must",
+      "category": "mode",
+      "title": "Mixed-mode is forbidden",
+      "scope": {
+        "paths": [
+          "**/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "mixed_mode_forbidden",
+          "definition": "A file intended to be sourced (root *.sh, lib/apps/modules/bootstrap) must not be executable; a bin/ entrypoint must not be treated as a library."
+        }
+      ]
+    },
+    {
+      "id": "BASH-SHEBANG-001",
+      "severity": "must",
+      "category": "content",
+      "title": "Entrypoints must include a bash shebang",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "first_non_empty_line_matches",
+          "pattern": "^#!.*\\bbash\\b"
+        }
+      ]
+    },
+    {
+      "id": "BASH-SHEBANG-002",
+      "severity": "must",
+      "category": "content",
+      "title": "Non-executables must not include a bash shebang",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "forbid_any_line_matches",
+          "pattern": "^#!.*\\bbash\\b"
+        }
+      ]
+    },
+    {
+      "id": "BASH-STRICT-001",
+      "severity": "must",
+      "category": "content",
+      "title": "Entrypoints must set strict mode",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^set -euo pipefail\\s*$"
+        }
+      ],
+      "notes": [
+        "This checks presence only; ordering is defined by bash.md but not linted here."
+      ]
+    },
+    {
+      "id": "BASH-STRICT-002",
+      "severity": "must",
+      "category": "content",
+      "title": "Sourced files must not set strict mode globally",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "forbid_any_line_matches",
+          "pattern": "^set -euo pipefail\\s*$"
+        }
+      ],
+      "notes": [
+        "Deliberately strict: forbids the line anywhere in sourced files to avoid caller side effects.",
+        "If you later want to allow strict subshell blocks in sourced files, relax this rule."
+      ]
+    },
+    {
+      "id": "BASH-SC-001",
+      "severity": "must",
+      "category": "content",
+      "title": "Non-executable Bash files must declare ShellCheck dialect",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "first_non_empty_line_equals",
+          "value": "# shellcheck shell=bash"
+        }
+      ]
+    },
+    {
+      "id": "BASH-GUARD-001",
+      "severity": "must",
+      "category": "content",
+      "title": "Sourced files must enforce sourcing with guard.require_sourced",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^\\s*guard\\.require_sourced(\\s+\"?\\$\\{BASH_SOURCE\\[0\\]\\}\"?)?\\s*$"
+        }
+      ],
+      "notes": [
+        "Calling guard.require_sourced without an argument is valid and defaults to BASH_SOURCE[1].",
+        "This rule enforces presence, not argument form."
+      ]
+    },
+    {
+      "id": "BASH-GUARD-002",
+      "severity": "should",
+      "category": "content",
+      "title": "Prefer explicit guard.require_sourced \"${BASH_SOURCE[0]}\" for determinism",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^\\s*guard\\.require_sourced\\s+\"\\$\\{BASH_SOURCE\\[0\\]\\}\"\\s*$"
+        }
+      ],
+      "notes": [
+        "Passing \"${BASH_SOURCE[0]}\" avoids ambiguity in wrapper or unusual call-stack scenarios."
+      ]
+    },
+    {
+      "id": "BASH-GUARD-003",
+      "severity": "must",
+      "category": "content",
+      "title": "Entrypoints must not call guard.require_sourced",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "forbid_any_line_matches",
+          "pattern": "^\\s*guard\\.require_sourced\\b"
+        }
+      ]
+    },
+    {
+      "id": "BASH-TOOL-001",
+      "severity": "must",
+      "category": "tooling",
+      "title": "ShellCheck must run at warning severity or higher over repo Bash scope",
+      "scope": {
+        "paths": [
+          "**/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "process_requirement",
+          "tool": "shellcheck",
+          "requirements": {
+            "min_severity": "warning",
+            "recommended_args": [
+              "--severity=warning",
+              "--external-sources"
+            ],
+            "include_paths": [
+              "bin/*",
+              "*.sh",
+              "lib/**/*.sh",
+              "apps/**/*.sh",
+              "modules/**/*.sh",
+              "bootstrap/**/*.sh"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "BASH-TOOL-002",
+      "severity": "must",
+      "category": "tooling",
+      "title": "shfmt must run with default settings over repo Bash scope",
+      "scope": {
+        "paths": [
+          "**/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "process_requirement",
+          "tool": "shfmt",
+          "requirements": {
+            "mode": "default",
+            "recommended_args": [
+              "-d"
+            ],
+            "include_paths": [
+              "bin/*",
+              "*.sh",
+              "lib/**/*.sh",
+              "apps/**/*.sh",
+              "modules/**/*.sh",
+              "bootstrap/**/*.sh"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "BASH-TOOL-003",
+      "severity": "must",
+      "category": "tooling",
+      "title": "Tooling scope must include bin/ even without .sh extensions",
+      "scope": {
+        "paths": [
+          "**/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "process_requirement",
+          "tool": "shellcheck_and_shfmt",
+          "requirements": {
+            "must_include_paths": [
+              "bin/*"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
