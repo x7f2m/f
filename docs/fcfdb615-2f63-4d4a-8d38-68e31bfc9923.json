@@ -84,7 +84,7 @@
         }
       ],
       "notes": [
-        "Bootstrap content minimality is not linted here; only execution/sourcing semantics."
+        "Bootstrap content minimality is linted via additional bootstrap rules below (Approach A)."
       ]
     },
     {
@@ -125,6 +125,9 @@
             "100755"
           ]
         }
+      ],
+      "notes": [
+        "Evaluated only if git mode metadata is present in the dump."
       ]
     },
     {
@@ -146,6 +149,9 @@
             "100755"
           ]
         }
+      ],
+      "notes": [
+        "Evaluated only if git mode metadata is present in the dump."
       ]
     },
     {
@@ -165,6 +171,9 @@
             "100755"
           ]
         }
+      ],
+      "notes": [
+        "Evaluated only if git mode metadata is present in the dump."
       ]
     },
     {
@@ -184,6 +193,9 @@
             "100755"
           ]
         }
+      ],
+      "notes": [
+        "Evaluated only if git mode metadata is present in the dump."
       ]
     },
     {
@@ -218,6 +230,26 @@
           "type": "first_non_empty_line_matches",
           "pattern": "^#!.*\\bbash\\b"
         }
+      ]
+    },
+    {
+      "id": "BASH-SHEBANG-003",
+      "severity": "must",
+      "category": "content",
+      "title": "Entrypoints must use the standard shebang '#!/usr/bin/env bash'",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "first_non_empty_line_equals",
+          "value": "#!/usr/bin/env bash"
+        }
+      ],
+      "notes": [
+        "Approach A: make the header structure fully deterministic and machine-checkable."
       ]
     },
     {
@@ -256,9 +288,27 @@
           "type": "require_any_line_matches",
           "pattern": "^set -euo pipefail\\s*$"
         }
+      ]
+    },
+    {
+      "id": "BASH-STRICT-003",
+      "severity": "must",
+      "category": "content",
+      "title": "Entrypoints must set strict mode as the second non-empty line",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "nth_non_empty_line_equals",
+          "n": 2,
+          "value": "set -euo pipefail"
+        }
       ],
       "notes": [
-        "This checks presence only; ordering is defined by bash.md but not linted here."
+        "Approach A: enforce required header structure ordering for bin/ scripts."
       ]
     },
     {
@@ -372,6 +422,261 @@
       ]
     },
     {
+      "id": "BASH-GUARD-004",
+      "severity": "must",
+      "category": "content",
+      "title": "Bootstrap files must enforce sourcing with guard.require_sourced",
+      "scope": {
+        "paths": [
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^\\s*guard\\.require_sourced"
+        }
+      ]
+    },
+    {
+      "id": "BASH-GUARD-005",
+      "severity": "must",
+      "category": "content",
+      "title": "Non-executable Bash files must include guard.require_sourced near the top (early once guard is available)",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 40,
+          "pattern": "^\\s*guard\\.require_sourced\\b"
+        }
+      ],
+      "notes": [
+        "Approach A: interpret 'as early as possible once guard is available' as 'within the first 40 lines'."
+      ]
+    },
+    {
+      "id": "BASH-HDR-001",
+      "severity": "must",
+      "category": "content",
+      "title": "Bash files must declare File, Domain, and Purpose headers",
+      "scope": {
+        "paths": [
+          "bin/*",
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^#\\s*File:"
+        },
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^#\\s*Domain:"
+        },
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^#\\s*Purpose:"
+        }
+      ]
+    },
+    {
+      "id": "BASH-HDR-002",
+      "severity": "must",
+      "category": "content",
+      "title": "Entrypoints must define invocation model clearly (executed)",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^#\\s*Invocation:\\s*executed\\s*$"
+        }
+      ],
+      "notes": [
+        "Approach A: standardises 'invocation model clearly' as a single required marker line."
+      ]
+    },
+    {
+      "id": "BASH-HDR-003",
+      "severity": "must",
+      "category": "content",
+      "title": "Sourced files must define invocation model clearly (sourced)",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^#\\s*Invocation:\\s*sourced\\s*$"
+        }
+      ],
+      "notes": [
+        "Approach A: standardises 'invocation model clearly' as a single required marker line."
+      ]
+    },
+    {
+      "id": "BASH-HDR-004",
+      "severity": "must",
+      "category": "content",
+      "title": "Entrypoint header fields must appear near the top (after shebang + strict mode)",
+      "scope": {
+        "paths": [
+          "bin/*"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 25,
+          "pattern": "^#\\s*File:\\s+.+$"
+        },
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 25,
+          "pattern": "^#\\s*Domain:\\s+.+$"
+        },
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 25,
+          "pattern": "^#\\s*Purpose:\\s+.+$"
+        },
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 25,
+          "pattern": "^#\\s*Invocation:\\s*executed\\s*$"
+        }
+      ]
+    },
+    {
+      "id": "BASH-HDR-005",
+      "severity": "must",
+      "category": "content",
+      "title": "Sourced header fields must appear near the top (after ShellCheck directive)",
+      "scope": {
+        "paths": [
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 30,
+          "pattern": "^#\\s*File:\\s+.+$"
+        },
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 30,
+          "pattern": "^#\\s*Domain:\\s+.+$"
+        },
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 30,
+          "pattern": "^#\\s*Purpose:\\s+.+$"
+        },
+        {
+          "type": "require_within_first_n_lines",
+          "max_lines": 30,
+          "pattern": "^#\\s*Invocation:\\s*sourced\\s*$"
+        }
+      ]
+    },
+    {
+      "id": "BASH-BOOT-001",
+      "severity": "must",
+      "category": "structure",
+      "title": "bootstrap/ must remain dependency-light: must not source apps/ or modules/",
+      "scope": {
+        "paths": [
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "forbid_any_line_matches",
+          "pattern": "^\\s*(source|\\.)\\s+.*\\bapps/\\b"
+        },
+        {
+          "type": "forbid_any_line_matches",
+          "pattern": "^\\s*(source|\\.)\\s+.*\\bmodules/\\b"
+        }
+      ],
+      "notes": [
+        "Encodes bash.md guidance to avoid pulling in large modules or domain logic."
+      ]
+    },
+    {
+      "id": "BASH-BOOT-002",
+      "severity": "should",
+      "category": "structure",
+      "title": "bootstrap/ should avoid sourcing lib/ (keep bootstrap minimal)",
+      "scope": {
+        "paths": [
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "forbid_any_line_matches",
+          "pattern": "^\\s*(source|\\.)\\s+.*\\blib/\\b"
+        }
+      ],
+      "notes": [
+        "If you need exceptions, replace this rule with an allow-list based rule."
+      ]
+    },
+    {
+      "id": "BASH-NAME-001",
+      "severity": "must",
+      "category": "naming",
+      "title": "Functions must be namespaced (domain.action)",
+      "scope": {
+        "paths": [
+          "bin/*",
+          "*.sh",
+          "lib/**/*.sh",
+          "apps/**/*.sh",
+          "modules/**/*.sh",
+          "bootstrap/**/*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "forbid_any_line_matches",
+          "pattern": "^(?!\\s*[A-Za-z_][A-Za-z0-9_]*\\.[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{)\\s*[A-Za-z_][A-Za-z0-9_]*\\s*\\(\\)\\s*\\{"
+        }
+      ],
+      "notes": [
+        "This flags any function definition of the form name() { that is not namespaced with a dot."
+      ]
+    },
+    {
       "id": "BASH-TOOL-001",
       "severity": "must",
       "category": "tooling",
@@ -453,6 +758,23 @@
               "bin/*"
             ]
           }
+        }
+      ]
+    },
+    {
+      "id": "BASH-ROOT-LOADER-001",
+      "severity": "should",
+      "category": "structure",
+      "title": "Top-level *.sh loaders should delegate to implementation files",
+      "scope": {
+        "paths": [
+          "*.sh"
+        ]
+      },
+      "checks": [
+        {
+          "type": "require_any_line_matches",
+          "pattern": "^(source|\\.)\\s+.+/.+"
         }
       ]
     }
