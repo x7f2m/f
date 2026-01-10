@@ -678,7 +678,7 @@
     },
     {
       "id": "BASH-TOOL-001",
-      "severity": "must",
+      "severity": "should ",
       "category": "tooling",
       "title": "ShellCheck must run at warning severity or higher over repo Bash scope",
       "scope": {
@@ -710,7 +710,7 @@
     },
     {
       "id": "BASH-TOOL-002",
-      "severity": "must",
+      "severity": "should",
       "category": "tooling",
       "title": "shfmt must run with default settings over repo Bash scope",
       "scope": {
@@ -741,7 +741,7 @@
     },
     {
       "id": "BASH-TOOL-003",
-      "severity": "must",
+      "severity": "should",
       "category": "tooling",
       "title": "Tooling scope must include bin/ even without .sh extensions",
       "scope": {
